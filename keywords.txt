@@ -1,0 +1,11 @@
+EthernetAutomation	KEYWORD1
+getLastClickedButton 	KEYWORD2
+isWebDBExists 	KEYWORD2
+addDB 	KEYWORD2
+logOut 	KEYWORD2
+addLogin 	KEYWORD2
+addButton 	KEYWORD2
+addDimmer 	KEYWORD2
+clearButtonIdx	KEYWORD2
+getDimmerValue	KEYWORD2
+getButtonState	KEYWORD2
