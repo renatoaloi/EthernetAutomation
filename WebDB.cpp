@@ -494,9 +494,11 @@ int WebDB::getButtonNextId(void)
 	return -1;
 }
 
-int WebDB::createButton(char _type, bool _state, char* _text, char _step, uchar _value)
+int WebDB::createButton(char _type, bool _state, char* _text, char _step, uchar _value, uchar _dimmerValue)
 {
 	int _id = getButtonNextId();
+
+	//if (isDimmer) _id = dimmerId;
 
 	if (_id != -1)
 	{
@@ -515,6 +517,7 @@ int WebDB::createButton(char _type, bool _state, char* _text, char _step, uchar 
 		}
 		recordButton->step = _step;
 		recordButton->value = _value;
+		recordButton->dimmerValue = _dimmerValue;
 
 		contador = 0;
 		for( int j = getDBButtonStart() + (sizeof(DBButtonRecord) * _id);
@@ -524,6 +527,8 @@ int WebDB::createButton(char _type, bool _state, char* _text, char _step, uchar 
 			contador++;
 		}
 	}
+
+	
 
 	return _id;
 }
@@ -718,6 +723,43 @@ void WebDB::setButtonValue(uint _id, uchar val)
 			contador++;
 		}
 	}
+}
+
+void WebDB::setDimmerValue(uint _id, uchar val)
+{
+	if (_id < getDBButtonMaxRecords())
+	{
+		recordButton = &m_button;
+		getButtonValue(_id);
+		contador = 0;
+		recordButton->dimmerValue = val;
+		for( int j = getDBButtonStart() + (sizeof(DBButtonRecord) * _id);
+			j < getDBButtonStart() + ((sizeof(DBButtonRecord) * _id) + sizeof(DBButtonRecord)); j++)
+		{
+			EEPROM.write(j, ((uchar*)recordButton)[contador]);
+			contador++;
+		}
+	}
+}
+
+uchar WebDB::getDimmerValue(uint _id)
+{
+	if (_id < getDBButtonMaxRecords())
+	{
+		recordButton = &m_button;
+		contador = 0;
+		for (unsigned i = 0; i < sizeof(DBButtonRecord); i++) buff[i] = 0;
+		for (int j = getDBButtonStart() + (sizeof(DBButtonRecord) * _id);
+				j < getDBButtonStart() + ((sizeof(DBButtonRecord) * _id) + sizeof(DBButtonRecord)); j++)
+		{
+			buff[contador] = EEPROM.read(j);
+			contador++;
+		}
+		recordButton = (DBButtonRecord*)buff;
+		return recordButton->dimmerValue;
+	}
+
+	return 0;
 }
 
 uchar WebDB::getButtonValue(uint _id)

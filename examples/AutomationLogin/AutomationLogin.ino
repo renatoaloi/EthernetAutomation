@@ -1,3 +1,4 @@
+#include <SPI.h>
 #include <EEPROM.h>
 #include <EthernetAutomation.h>
 #include <EtherEncLib.h>
@@ -17,6 +18,8 @@ EthernetAutomation automation(80);
 
 void setup()
 {
+  pinMode(10,OUTPUT);	//--- ? -- SS pin must be output # by Renato Aloi
+
   Serial.begin(115200);
   delay(200);
   Serial.println(F("Serial OK!"));

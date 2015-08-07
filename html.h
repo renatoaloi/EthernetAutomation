@@ -4,13 +4,16 @@
   Released into the public domain.
 */
 
-#define P(name)	static const prog_uchar name[] PROGMEM
+//const PROGMEM char resp200Txt[] = {"HTTP/1.0 200 OK\n\rContent-Type: text/html\n\rPragma: no-cache\n\r\n\r"};
+//#define P(name)	static const prog_uchar name[] PROGMEM
+#define P(name)	const PROGMEM char name[] 
 
 #include "login_form.h"
 
-P(http200) = "HTTP/1.1 200 OK\r\n";
-P(contenttype) = "Content-Type: text/html\r\n";
-P(connkeep) = "Connection: close\r\n\r\n";
+P(resp200Txt) = "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\nPragma: no-cache\r\nConnection: close\r\n\r\n";
+//P(http200) = "HTTP/1.1 200 OK\r\n";
+//P(contenttype) = "Content-Type: text/html\r\n";
+//P(connkeep) = "Connection: close\r\n\r\n";
 P(doctype) = "<!DOCTYPE HTML>\r\n";
 P(teste) = "<H1>Teste de HTML</H1>\r\n"; //24
 
@@ -35,7 +38,7 @@ P(div_fim) = "<p align='center' class='small'>"
 "<a href='#' class='small'>Powered by Serial Link</a></p>"
 "</div>"
 "</BODY>"
-"</HTML>";
+"</HTML> ";
 
 P(button_ini) = "<p align='center'><a href='";
 P(button_mid1) = "' class='super button ";
@@ -47,54 +50,27 @@ P(label_fim) = "</span></p>";
 
 P(dimmer_ini1) = "<p align='center'><span class='normal painel grey' align='center'>";
 P(dimmer_ini2) = "<br><a href='";
-P(dimmer_mid11) = "' class='super button ";
+P(dimmer_mid11) = "' class='small button ";
 P(dimmer_mid12) = "'>";
 P(dimmer_mid2) = "</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='";
-P(dimmer_mid21) = "' class='super button ";
+P(dimmer_mid21) = "' class='small button ";
 P(dimmer_mid22) = "'>";
 P(dimmer_fim) = "</a></span></p>";
 
 P(dimmer_space) = "&nbsp;";
 
-P(stylesheet) = "<meta name='viewport' content='width=device-width; "
-"initial-scale=1.0; maximum-scale=1.0; user-scalable=0;' />"
-"<style media='all' type='text/css' >"
-".painel,.painel:hover,.painel:active,.painel:visited{"
-"background:#222;"
-"display:inline-block;"
-"padding:5px 10px 6px;"
-"color:#fff;text-decoration:none;"
-"-moz-border-radius:6px;"
-"-webkit-border-radius:6px;"
-"-moz-box-shadow:0 1px 3px rgba(0,0,0,0.6);"
-"-webkit-box-shadow:0 1px 3px rgba(0,0,0,0.6);"
-"text-shadow:0 -1px 1px rgba(0,0,0,0.25);"
-"border-bottom:1px solid rgba(0,0,0,0.25);"
-"position:relative;"
-"cursor:default;}"
-".grey.painel{background:#EEE;}"
-".super.painel{font-size:34px;padding:8px 14px 9px;font-family:arial;}"
-".small,.small:hover,.small:active,.small:visited{font-size:11px;"
-"text-decoration:none;color: #fff;}"
-".normal,.normal:hover,.normal:active,.normal:visited{font-size:16px;"
-"text-decoration:none;color: #222;font-family:verdana;}"
-".button,.button:visited{background:#222;"
-"display:inline-block;padding:5px 10px 6px;color:#fff;text-decoration:none;"
-"-moz-border-radius:6px;-webkit-border-radius:6px;"
-"-moz-box-shadow:0 1px 3px rgba(0,0,0,0.6);"
-"-webkit-box-shadow:0 1px 3px rgba(0,0,0,0.6);"
-"text-shadow:0 -1px 1px rgba(0,0,0,0.25);"
-"border-bottom:1px solid rgba(0,0,0,0.25);position:relative;cursor:pointer}"
-".button:hover{background-color:#111;color:#fff;}"
-".button:active{top:1px;}"
-".small.button,.small.button:visited{font-size:11px}"
-".button,.button:visited,.medium.button,.medium.button:visited{font-size:13px;"
-"font-weight:bold;line-height:1;text-shadow:0 -1px 1px rgba(0,0,0,0.25);}"
-".large.button,.large.button:visited{font-size:14px;padding:8px 14px 9px;}"
-".super.button,.super.button:visited{font-size:34px;padding:8px 14px 9px;}"
-".green.button,.green.button:visited{background-color:#91bd09;}"
-".green.button:hover{background-color:#749a02;}"
-".red.button,.red.button:visited{background-color:#e62727;}"
-".red.button:hover{background-color:#cf2525;}"
-".blue.button,.blue.button:visited{background-color:#2981e4;}"
-".blue.button:hover{background-color:#2575cf;}</style>";
+P(stylesheet0) = "<meta name='viewport' content='width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;' /><style media='all' type='text/css' >";
+P(stylesheet1) = ".painel,.painel:hover,.painel:active,.painel:visited{background:#222;display:inline-block;padding:5px 10px 6px;color:#fff;text-decoration:none;";
+P(stylesheet2) = "-moz-border-radius:6px;-webkit-border-radius:6px;-moz-box-shadow:0 1px 3px rgba(0,0,0,0.6);-webkit-box-shadow:0 1px 3px rgba(0,0,0,0.6);text-shadow:0 -1px 1px rgba(0,0,0,0.25);";
+P(stylesheet3) = "border-bottom:1px solid rgba(0,0,0,0.25);position:relative;cursor:default;}.grey.painel{background:#EEE;}.super.painel{font-size:34px;padding:8px 14px 9px;font-family:arial;}";
+P(stylesheet4) = ".small,.small:hover,.small:active,.small:visited{font-size:11px;text-decoration:none;color: #fff;}.normal,.normal:hover,.normal:active,.normal:visited{font-size:16px;";
+P(stylesheet5) = "text-decoration:none;color: #222;font-family:verdana;}.button,.button:visited{background:#222;display:inline-block;padding:5px 10px 6px;color:#fff;text-decoration:none;";
+P(stylesheet6) = "-moz-border-radius:6px;-webkit-border-radius:6px;-moz-box-shadow:0 1px 3px rgba(0,0,0,0.6);-webkit-box-shadow:0 1px 3px rgba(0,0,0,0.6);";
+P(stylesheet7) = "text-shadow:0 -1px 1px rgba(0,0,0,0.25);border-bottom:1px solid rgba(0,0,0,0.25);position:relative;cursor:pointer}.button:hover{background-color:#111;color:#fff;}";
+P(stylesheet8) = ".button:active{top:1px;}.small.button,.small.button:visited{font-size:11px}.button,.button:visited,.medium.button,.medium.button:visited{font-size:13px;";
+P(stylesheet9) = "font-weight:bold;line-height:1;text-shadow:0 -1px 1px rgba(0,0,0,0.25);}.large.button,.large.button:visited{font-size:14px;padding:8px 14px 9px;}.super.button,.super.button:visited{font-size:34px;padding:8px 14px 9px;}";
+P(stylesheet10) = ".green.button,.green.button:visited{background-color:#91bd09;}.green.button:hover{background-color:#749a02;}.red.button,.red.button:visited{background-color:#e62727;}";
+P(stylesheet11) = ".red.button:hover{background-color:#cf2525;}.blue.button,.blue.button:visited{background-color:#2981e4;}.blue.button:hover{background-color:#2575cf;}</style>";
+
+
+

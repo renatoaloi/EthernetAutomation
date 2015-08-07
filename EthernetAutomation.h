@@ -37,8 +37,11 @@ private:
 	char        m_login[LOGIN_MAX];
 	char        m_pass[PASS_MAX];
 	int         m_lastButtonId;
+	uchar       m_lastButtonValue;
 
-	void printP(EtherEncLib &client, const prog_uchar *str);
+	//void printP(EtherEncLib &client, const prog_uchar *str);
+	//static int GetIntFromStringStream(char* c);
+
 
 	void returnLoginFormToClient(void);
 	void returnHtmlToClient(void);
@@ -51,7 +54,7 @@ private:
 	};
 
 public:
-	EthernetAutomation(uint port) : m_lastButtonId(-1), m_contador(0), m_port(port), m_db(WebDB()), m_net(EtherEncLib(port)) { init(); };
+	EthernetAutomation(uint port) : m_lastButtonId(-1), m_lastButtonValue(0), m_contador(0), m_port(port), m_db(WebDB()), m_net(EtherEncLib(port)) { init(); };
 	EthernetAutomation() : m_lastButtonId(-1), m_contador(0), m_port(DEFAULT_WEB_PORT), m_db(WebDB()), m_net(EtherEncLib(DEFAULT_WEB_PORT))  { init(); };
 
 	void begin(uchar* mac, uchar* ip) { begin(mac, ip, DEFAULT_WEB_PORT); };
@@ -67,26 +70,38 @@ public:
 
 	//int WebDB::createButton(char _type, bool _state, char* _text, char _step, uchar _value)
 	void addButton(char pin, char *texton, char type) { addButton(pin, texton, type, (type == PULSE_BUTTON) ? (char)-1 : (char)0); };
-	void addButton(char pin, char *texton, char type, char state) { m_db.createButton(type, state, texton, 0, pin); };
+	void addButton(char pin, char *texton, char type, char state) { m_db.createButton(type, state, texton, 0, pin, 0); };
 
-    void addDimmer(char id, char *textdim, unsigned char iniValue, char direction) { addDimmer(id, textdim, iniValue, direction, 1, DIMMER_BUTTON); };
-    void addDimmer(char id, char *textdim, unsigned char iniValue, char direction, char step) { addDimmer(id, textdim, iniValue, direction, step, DIMMER_BUTTON); };
-    void addDimmer(char id, char *textdim, unsigned char iniValue, char direction, char step, char type) {
-        //m_db.createDimmer(pin, textdim, iniValue, direction, step, type);
-        m_db.createButton(type, direction, textdim, step, iniValue);
-    };
+    	void addDimmer(char id, char *textdim, unsigned char iniValue, char direction) { addDimmer(id, textdim, iniValue, direction, 1, DIMMER_BUTTON); };
+    	void addDimmer(char id, char *textdim, unsigned char iniValue, char direction, char step) { addDimmer(id, textdim, iniValue, direction, step, DIMMER_BUTTON); };
+    	void addDimmer(char id, char *textdim, unsigned char iniValue, char direction, char step, char type) {
+        	//m_db.createDimmer(pin, textdim, iniValue, direction, step, type);
+        	m_db.createButton(type, direction, textdim, step, id, iniValue);
+    	};
 
 	bool available() { strcpy(m_login, "_no_auth_"); available(0); };
 	bool available(const char activateLogin);
 
 	int getLastClickedButton(void) { return m_lastButtonId; }; //return m_db.findButton(m_lastButtonId); };
+
+
+
 	uchar getButtonState(uint id) /*{ return 0; };*/ {
-        int btid = m_db.findButton(m_lastButtonId);
-        if (btid >= 0)
-            return m_db.getButtonState(btid);
-        else
-            return 255;
-    };
+          int btid = m_db.findButton(m_lastButtonId);
+          if (btid >= 0)
+              return m_db.getButtonState(btid);
+          else
+              return 255;
+        };
+
+
+        uchar getDimmerValue(uint id) /*{ return 0; };*/ {
+          int btid = m_db.findButton(m_lastButtonId);
+          if (btid >= 0)
+              return m_db.getDimmerValue(btid);
+          else
+              return 0;
+        };
 
 
 	/*

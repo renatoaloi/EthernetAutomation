@@ -2,33 +2,13 @@
   EthernetAutomation.h - Library for Curso Arduino Automation Kit.
   Created by Renato Aloi, Nov, 2014.
   Released into the public domain.
+  seriallink.com.br
 */
 
 #include "EthernetAutomation.h"
 
+extern "C" {
 static int GetIntFromStringStream(char* c);
-
-void EthernetAutomation::printP(EtherEncLib &client, const prog_uchar *str)
-{
-    for (unsigned i = 0; i < BUFF_TMP_LEN; i++) buffTmp[i] = 0;
-    m_contador = 0;
-    bool finalPrint = true;
-    while(pgmChar = pgm_read_byte(str++))
-    {
-        finalPrint = true;
-        buffTmp[m_contador] = (char)pgmChar;
-        if (m_contador+1 >= (BUFF_TMP_LEN-1))
-        {
-            client.print(buffTmp);
-            //delay(1);
-            for (unsigned i = 0; i < BUFF_TMP_LEN; i++) buffTmp[i] = 0;
-            finalPrint = false;
-            m_contador = 0;
-        }
-        else
-            m_contador++;
-    }
-    if (finalPrint) client.print(buffTmp);
 };
 
 void EthernetAutomation::begin(uchar* mac, uchar* ip, uint port, bool createDB)
@@ -42,28 +22,49 @@ void EthernetAutomation::begin(uchar* mac, uchar* ip, uint port, bool createDB)
 
 bool EthernetAutomation::available(const char activateLogin)
 {
-    bool ret = false;
+    	bool ret = false;
 
 	if (m_net.available())
 	{
 		// GET/POST parameters
-        char *params = m_net.getParams();
+        	char *params = m_net.getParams();
 
-		//Serial.print(F("Parametros: "));
-		//Serial.println(params);
+		Serial.print(F("Parametros: "));
+		Serial.println(params);
 
 		if (params[0] == '?')
 		{
-            //Serial.println(F("Tratando GET!"));
+            		Serial.println(F("Tratando GET!"));
 			// GET
 			for (unsigned i = 1; i < PARAMS_LEN; i++)
 			{
 				if (strncmp(&params[i], "button_id=", 10) == 0)
 				{
-                    m_lastButtonId = GetIntFromStringStream(&params[i+10]);
+                    			m_lastButtonId = GetIntFromStringStream(&params[i+10]);
 
-					//Serial.print(F("Found! Button ID: "));
-					//Serial.println(m_lastButtonId, DEC);
+					Serial.print(F("Found! Button ID: "));
+					Serial.println(m_lastButtonId, DEC);
+
+				}
+
+				if (strncmp(&params[i], "button_value=up", 15) == 0)
+				{
+					int btid = m_db.findButton(m_lastButtonId);
+					if (m_lastButtonValue + m_db.getButtonStep(btid) < 256)
+	                    			m_lastButtonValue += m_db.getButtonStep(btid);
+
+					Serial.print(F("Dimmer Up: "));
+					Serial.println(m_lastButtonValue, DEC);
+
+				}
+				else if (strncmp(&params[i], "button_value=down", 17) == 0)
+				{
+					int btid = m_db.findButton(m_lastButtonId);
+					if (m_lastButtonValue - m_db.getButtonStep(btid) >= 0)
+	                    			m_lastButtonValue -= m_db.getButtonStep(btid);
+
+					Serial.print(F("Dimmer Down: "));
+					Serial.println(m_lastButtonValue, DEC);
 
 				}
 			}
@@ -72,72 +73,70 @@ bool EthernetAutomation::available(const char activateLogin)
 		}
 		else if (params[0] > 0)
 		{
-            //Serial.println(F("Tratando POST!"));
+            		Serial.println(F("Tratando POST!"));
 			// POST
 			for (unsigned i = 0; i < PARAMS_LEN; i++)
 			{
-                // getting login from POST data
+                		// getting login from POST data
 				if (strncmp(&params[i], "login=", 6) == 0)
 				{
-                    //Serial.println(F("Achei login!"));
-                    int j = i;
-                    int k = 0;
+				    //Serial.println(F("Achei login!"));
+				    int j = i;
+				    int k = 0;
 
-                    //Serial.print(params[j+6]);
-                    //Serial.print(params[j+7]);
-                    //Serial.print(params[j+8]);
+				    //Serial.print(params[j+6]);
+				    //Serial.print(params[j+7]);
+				    //Serial.print(params[j+8]);
 
-                    while((params[j+6] >= ' ') && (params[j+6] <= '}') && (params[j+6] != '&'))
-                    {
-                        //Serial.print(params[j+6]);
-                        m_login[k] = params[j+6];
-                        j++; k++;
-                    }
-                    break;
+				    while((params[j+6] >= ' ') && (params[j+6] <= '}') && (params[j+6] != '&'))
+				    {
+				        //Serial.print(params[j+6]);
+				        m_login[k] = params[j+6];
+				        j++; k++;
+				    }
+				    break;
 				}
-            }
+			}
 
-            // getting pass from POST data
-            for (unsigned i = 1; i < PARAMS_LEN; i++)
+			// getting pass from POST data
+            		for (unsigned i = 1; i < PARAMS_LEN; i++)
 			{
 				if (strncmp(&params[i], "pass=", 5) == 0)
 				{
-                    //Serial.println(F("Achei pass!"));
-                    int j = i;
-                    int k = 0;
-                    //Serial.print(params[j+5]);
-                    //Serial.print(params[j+6]);
-                    //Serial.print(params[j+7]);
-                    //Serial.print(params[j+8]);
+                    			Serial.println(F("Achei pass!"));
+				    int j = i;
+				    int k = 0;
+				    //Serial.print(params[j+5]);
+				    //Serial.print(params[j+6]);
+				    //Serial.print(params[j+7]);
+				    //Serial.print(params[j+8]);
 
-                    while((params[j+5] >= ' ') && (params[j+5] <= '}') && (params[j+5] != '&'))
-                    {
-                        //Serial.print(params[j+5]);
-                        m_pass[k] = params[j+5];
-                        j++; k++;
-                    }
-                    break;
+				    while((params[j+5] >= ' ') && (params[j+5] <= '}') && (params[j+5] != '&'))
+				    {
+				        //Serial.print(params[j+5]);
+				        m_pass[k] = params[j+5];
+				        j++; k++;
+				    }
+				    break;
 				}
-            }
+            		}
 
 
-            //Serial.print(F("login: "));
-            //Serial.println(m_login);
-            //Serial.print(F("pass: "));
-            //Serial.println(m_pass);
-
+			Serial.print(F("login: "));
+			Serial.println(m_login);
+			Serial.print(F("pass: "));
+			Serial.println(m_pass);
 
 		}
 
 		if (checkLogin()) ret = true;
 		else
 		{
-            close();
+			close();
 		}
-
-        // Return true if login ok!
-        //if (strncmp(m_login, "_no_auth_", LOGIN_MAX) == 0) ret = true;
-        //else if (m_login[0] == 0) { returnLoginFormToClient(); checkLogin(); }
+		// Return true if login ok!
+		//if (strncmp(m_login, "_no_auth_", LOGIN_MAX) == 0) ret = true;
+		//else if (m_login[0] == 0) { returnLoginFormToClient(); checkLogin(); }
 	}
 
 	return ret;
@@ -161,14 +160,45 @@ void EthernetAutomation::close(void)
         }
     }
     m_net.close();
+    delay(10);
 }
 
 void EthernetAutomation::returnLoginFormToClient(void)
 {
-    //Serial.println(F("returnLoginFormToClient"));
+	//Serial.println(F("returnLoginFormToClient"));
 
-    // HTML Header
-    printP(m_net, head_ini);
+	// HTML Header
+	m_net.print((char *)&resp200Txt[0],strlen_P(&resp200Txt[0]));
+	m_net.print((char *)&head_ini[0],strlen_P(&head_ini[0]));
+	m_net.print((char *)&stylesheet0[0],strlen_P(&stylesheet0[0]));
+	m_net.print((char *)&stylesheet1[0],strlen_P(&stylesheet1[0]));
+	m_net.print((char *)&stylesheet2[0],strlen_P(&stylesheet2[0]));
+	m_net.print((char *)&stylesheet3[0],strlen_P(&stylesheet3[0]));
+	m_net.print((char *)&stylesheet4[0],strlen_P(&stylesheet4[0]));
+	m_net.print((char *)&stylesheet5[0],strlen_P(&stylesheet5[0]));
+	m_net.print((char *)&stylesheet6[0],strlen_P(&stylesheet6[0]));
+	m_net.print((char *)&stylesheet7[0],strlen_P(&stylesheet7[0]));
+	m_net.print((char *)&stylesheet8[0],strlen_P(&stylesheet8[0]));
+	m_net.print((char *)&stylesheet9[0],strlen_P(&stylesheet9[0]));
+	m_net.print((char *)&stylesheet10[0],strlen_P(&stylesheet10[0]));
+	m_net.print((char *)&stylesheet11[0],strlen_P(&stylesheet11[0]));
+	m_net.print((char *)&head_fim[0],strlen_P(&head_fim[0]));
+	m_net.print((char *)&div_ini[0],strlen_P(&div_ini[0]));
+
+	// HTML Login Form
+	m_net.print((char *)&formOpenTag[0],strlen_P(&formOpenTag[0]));
+	m_net.print((char *)&formLabelLogin[0],strlen_P(&formLabelLogin[0]));
+	m_net.print((char *)&formInputLogin[0],strlen_P(&formInputLogin[0]));
+	m_net.print((char *)&formLabelSenha[0],strlen_P(&formLabelSenha[0]));
+	m_net.print((char *)&formInputSenha[0],strlen_P(&formInputSenha[0]));
+	m_net.print((char *)&formInputButton[0],strlen_P(&formInputButton[0]));
+	m_net.print((char *)&formCloseTag[0],strlen_P(&formCloseTag[0]));
+
+	// Closing HTML
+	m_net.print((char *)&div_fim[0],strlen_P(&div_fim[0]));
+
+	// HTML Header
+	/*printP(m_net, head_ini);
 	printP(m_net, stylesheet);
 	printP(m_net, head_fim);
 	printP(m_net, div_ini);
@@ -183,20 +213,33 @@ void EthernetAutomation::returnLoginFormToClient(void)
 	printP(m_net, formCloseTag);
 
 	// HTML Footer
-	printP(m_net, div_fim);
+	printP(m_net, div_fim);*/
 }
 
 void EthernetAutomation::returnHtmlToClient(void)
 {
-    int btid = m_db.findButton(m_lastButtonId);
-    //Serial.println(F("returnHtmlToClient"));
+	int btid = m_db.findButton(m_lastButtonId);
+	//Serial.println(F("returnHtmlToClient"));
 
-    // HTML Header
-    printP(m_net, head_ini);
-	printP(m_net, stylesheet);
-	printP(m_net, head_fim);
-	printP(m_net, div_ini);
+	// HTML Header
+	m_net.print((char *)&resp200Txt[0],strlen_P(&resp200Txt[0]));
+	m_net.print((char *)&head_ini[0],strlen_P(&head_ini[0]));
+	m_net.print((char *)&stylesheet0[0],strlen_P(&stylesheet0[0]));
+	m_net.print((char *)&stylesheet1[0],strlen_P(&stylesheet1[0]));
+	m_net.print((char *)&stylesheet2[0],strlen_P(&stylesheet2[0]));
+	m_net.print((char *)&stylesheet3[0],strlen_P(&stylesheet3[0]));
+	m_net.print((char *)&stylesheet4[0],strlen_P(&stylesheet4[0]));
+	m_net.print((char *)&stylesheet5[0],strlen_P(&stylesheet5[0]));
+	m_net.print((char *)&stylesheet6[0],strlen_P(&stylesheet6[0]));
+	m_net.print((char *)&stylesheet7[0],strlen_P(&stylesheet7[0]));
+	m_net.print((char *)&stylesheet8[0],strlen_P(&stylesheet8[0]));
+	m_net.print((char *)&stylesheet9[0],strlen_P(&stylesheet9[0]));
+	m_net.print((char *)&stylesheet10[0],strlen_P(&stylesheet10[0]));
+	m_net.print((char *)&stylesheet11[0],strlen_P(&stylesheet11[0]));
+	m_net.print((char *)&head_fim[0],strlen_P(&head_fim[0]));
+	m_net.print((char *)&div_ini[0],strlen_P(&div_ini[0]));
 
+	
 	// here goes the automation web panel
 	// Verificando o tipo de botao
 	if (btid != -1)
@@ -207,20 +250,20 @@ void EthernetAutomation::returnHtmlToClient(void)
 		}
 		else if (m_db.getButtonType(btid) == DIMMER_BUTTON)
 		{
-			if (m_db.getButtonState(btid) == 1)
-			{
-				if (m_db.getButtonValue(btid) + m_db.getButtonStep(btid) < 255)
-					m_db.setButtonValue(btid, m_db.getButtonValue(btid) + m_db.getButtonStep(btid));
-				else
-					m_db.setButtonValue(btid,  255);
-			}
-			else if (m_db.getButtonState(btid) == 2)
-			{
-                if (m_db.getButtonValue(btid) - m_db.getButtonStep(btid) > 0)
-					m_db.setButtonValue(btid, m_db.getButtonValue(btid) - m_db.getButtonStep(btid));
-				else
-					m_db.setButtonValue(btid,  0);
-			}
+			//if (m_db.getButtonState(btid) == 1)
+			//{
+			//	if (m_db.getButtonValue(btid) + m_db.getButtonStep(btid) < 255)
+			//		m_db.setButtonValue(btid, m_db.getButtonValue(btid) + m_db.getButtonStep(btid));
+			//	else
+					m_db.setDimmerValue(btid,  m_lastButtonValue);
+			//}
+			//else if (m_db.getButtonState(btid) == 2)
+			//{
+                //if (m_db.getButtonValue(btid) - m_db.getButtonStep(btid) > 0)
+			//		m_db.setButtonValue(btid, m_db.getButtonValue(btid) - m_db.getButtonStep(btid));
+			//	else
+			//		m_db.setButtonValue(btid,  0);
+			//}
 		}
 
 
@@ -232,7 +275,8 @@ void EthernetAutomation::returnHtmlToClient(void)
 		{
 			if (m_db.getButtonType(i) == DIMMER_BUTTON)
 			{
-				printP(m_net, dimmer_ini1);
+				m_net.print((char *)&dimmer_ini1[0],strlen_P(&dimmer_ini1[0]));
+				//printP(m_net, dimmer_ini1);
 				m_net.print(m_db.getButtonText(i));
 
 				// converting to percent
@@ -240,66 +284,105 @@ void EthernetAutomation::returnHtmlToClient(void)
 				m_net.print(val1);
 				m_net.print("%");
 
-				printP(m_net, dimmer_ini2);
-
-				// link do dimmer UP
-				printP(m_net, btnid);
-				m_net.print(m_db.getButtonId(i));
-				printP(m_net, dimmerdown);
-				printP(m_net, dimmer_mid11);
-				printP(m_net, colorgreen);
-				printP(m_net, dimmer_mid12);
-				printP(m_net, dimmer_space);
-				printP(m_net, dimmer_space);
-				m_net.print("-");
-				printP(m_net, dimmer_space);
-				printP(m_net, dimmer_space);
-				printP(m_net, dimmer_mid2);
+				//printP(m_net, dimmer_ini2);
+				m_net.print((char *)&dimmer_ini2[0],strlen_P(&dimmer_ini2[0]));
 
 				// link do dimmer DOWN
-				printP(m_net, btnid);
+				m_net.print((char *)&btnid[0],strlen_P(&btnid[0]));
+				//printP(m_net, btnid);
 				m_net.print(m_db.getButtonId(i));
-				printP(m_net, dimmerup);
-				printP(m_net, dimmer_mid21);
-				printP(m_net, colorgreen);
-				printP(m_net, dimmer_mid22);
-				printP(m_net, dimmer_space);
-				printP(m_net, dimmer_space);
+				m_net.print((char *)&dimmerdown[0],strlen_P(&dimmerdown[0]));
+				//printP(m_net, dimmerdown);
+				m_net.print((char *)&dimmer_mid11[0],strlen_P(&dimmer_mid11[0]));
+				//printP(m_net, dimmer_mid11);
+				m_net.print((char *)&colorgreen[0],strlen_P(&colorgreen[0]));
+				//printP(m_net, colorgreen);
+				m_net.print((char *)&dimmer_mid12[0],strlen_P(&dimmer_mid12[0]));
+				//printP(m_net, dimmer_mid12);
+				m_net.print((char *)&dimmer_space[0],strlen_P(&dimmer_space[0]));
+				//printP(m_net, dimmer_space);
+				m_net.print((char *)&dimmer_space[0],strlen_P(&dimmer_space[0]));
+				//printP(m_net, dimmer_space);
+				m_net.print("-");
+
+
+				m_net.print((char *)&dimmer_space[0],strlen_P(&dimmer_space[0]));
+				//printP(m_net, dimmer_space);
+				m_net.print((char *)&dimmer_space[0],strlen_P(&dimmer_space[0]));
+				//printP(m_net, dimmer_space);
+				m_net.print((char *)&dimmer_mid2[0],strlen_P(&dimmer_mid2[0]));
+				//printP(m_net, dimmer_mid2);
+			
+
+				// link do dimmer UP
+				m_net.print((char *)&btnid[0],strlen_P(&btnid[0]));
+				//printP(m_net, btnid);
+				m_net.print(m_db.getButtonId(i));
+				m_net.print((char *)&dimmerup[0],strlen_P(&dimmerup[0]));
+				//printP(m_net, dimmerup);
+				m_net.print((char *)&dimmer_mid21[0],strlen_P(&dimmer_mid21[0]));
+				//printP(m_net, dimmer_mid21);
+				m_net.print((char *)&colorgreen[0],strlen_P(&colorgreen[0]));
+				//printP(m_net, colorgreen);
+				m_net.print((char *)&dimmer_mid22[0],strlen_P(&dimmer_mid22[0]));
+				//printP(m_net, dimmer_mid22);
+				m_net.print((char *)&dimmer_space[0],strlen_P(&dimmer_space[0]));
+				//printP(m_net, dimmer_space);
+				m_net.print((char *)&dimmer_space[0],strlen_P(&dimmer_space[0]));
+				//printP(m_net, dimmer_space);
 				m_net.print("+");
-				printP(m_net, dimmer_space);
-				printP(m_net, dimmer_space);
-				printP(m_net, dimmer_fim);
+
+
+				m_net.print((char *)&dimmer_space[0],strlen_P(&dimmer_space[0]));
+				//printP(m_net, dimmer_space);
+				m_net.print((char *)&dimmer_space[0],strlen_P(&dimmer_space[0]));
+				//printP(m_net, dimmer_space);
+				m_net.print((char *)&dimmer_fim[0],strlen_P(&dimmer_fim[0]));
+				//printP(m_net, dimmer_fim);
+
+
+
+
+
+
+
 			}
 			else
 			{
-				printP(m_net, button_ini);
+				//printP(m_net, button_ini);
+				m_net.print((char *)&button_ini[0],strlen_P(&button_ini[0]));
 
 				// link do botao
-				printP(m_net, btnid);
+				//printP(m_net, btnid);
+				m_net.print((char *)&btnid[0],strlen_P(&btnid[0]));
 				m_net.print(m_db.getButtonId(i));
-				printP(m_net, button_mid1);
+				m_net.print((char *)&button_mid1[0],strlen_P(&button_mid1[0]));
+				//printP(m_net, button_mid1);
 
 				// cor do botao
 				if (m_db.getButtonState(i) == 1)
 				{
-					printP(m_net, colorred);
+					m_net.print((char *)&colorred[0],strlen_P(&colorred[0]));
+					//printP(m_net, colorred);
 				}
 				else
 				{
-					printP(m_net, colorblue);
+					m_net.print((char *)&colorblue[0],strlen_P(&colorblue[0]));
+					//printP(m_net, colorblue);
 				}
-				printP(m_net, button_mid2);
+				m_net.print((char *)&button_mid2[0],strlen_P(&button_mid2[0]));
+				//printP(m_net, button_mid2);
 
 				// texto do botao
 				m_net.print(m_db.getButtonText(i));
-				printP(m_net, button_fim);
+				m_net.print((char *)&button_fim[0],strlen_P(&button_fim[0]));
+				//printP(m_net, button_fim);
 			}
 		}
 	}
 
-	// HTML Footer
-	printP(m_net, div_fim);
-
+	// Closing HTML
+	m_net.print((char *)&div_fim[0],strlen_P(&div_fim[0]));
 
 }
 

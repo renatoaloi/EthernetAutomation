@@ -53,7 +53,8 @@ typedef struct DBButtonRecord
 	char  text[TEXT_MAX];
 	char  step;
 	uchar value;
-}; // 2 + 1 + 1 + (1 * 20) + 1 + 1 = 26 bytes
+	uchar dimmerValue;
+}; // 2 + 1 + 1 + (1 * 20) + 1 + 1 + 1 = 27 bytes
 
 enum DBType
 {
@@ -127,13 +128,15 @@ public:
 	char* getButtonText(uint _id);
 	void  setButtonText(uint _id, char *text);
 	void  deleteButton(uint _id);
-	int   createButton(char _type, bool _state, char* _text, char _step, uchar _value);
+	int   createButton(char _type, bool _state, char* _text, char _step, uchar _value, uchar _dimmerValue);
 	void  setButtonState(uint _id, char val);
 	uchar getButtonState(uint _id);
 	int   findButton(uint idVal);
 	char  getButtonType(uint _id);
     void  setButtonType(uint _id, char val);
     uchar getButtonValue(uint _id);
+    uchar getDimmerValue(uint _id);
+    void  setDimmerValue(uint _id, uchar val);
     void  setButtonValue(uint _id, uchar val);
     char  getButtonStep(uint _id);
     void  setButtonStep(uint _id, char val);
